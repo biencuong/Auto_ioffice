@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iOffice AI Agent — Dashboard</title>
+    <link rel="preconnect" href="https://rsms.me/" crossorigin>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+</head>
+<body>
+
+    <!-- ===== DRAWER OVERLAY ===== -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+
+    <!-- ===== DRAWER SIDEBAR ===== -->
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-brand">
+                <div class="drawer-logo">🏛️</div>
+                <div class="drawer-brand-text">
+                    <h2>iOffice AI</h2>
+                    <span class="ver">v2.0</span>
+                </div>
+            </div>
+            <button class="drawer-close" id="drawerClose" title="Đóng menu">✕</button>
+        </div>
+        <nav class="drawer-nav">
+            <div class="drawer-section">Dashboard</div>
+            <a href="#" class="drawer-item active" data-page="dashboard">
+                <span class="nav-icon">📊</span> Tổng quan
+            </a>
+            <a href="#" class="drawer-item" data-page="documents">
+                <span class="nav-icon">📄</span> Văn bản
+            </a>
+            <a href="#" class="drawer-item" data-page="journal">
+                <span class="nav-icon">📅</span> Nhật ký
+            </a>
+            <a href="#" class="drawer-item" data-page="tasks">
+                <span class="nav-icon">✅</span> Công việc
+            </a>
+            <div class="drawer-section">Quản lý</div>
+            <a href="#" class="drawer-item" data-page="prompts">
+                <span class="nav-icon">🤖</span> Prompt
+            </a>
+            <a href="#" class="drawer-item" data-page="knowledge">
+                <span class="nav-icon">📚</span> Kiến thức
+            </a>
+            <a href="#" class="drawer-item" data-page="agents">
+                <span class="nav-icon">👤</span> Agent
+            </a>
+            <div class="drawer-section">Hệ thống</div>
+            <a href="#" class="drawer-item" data-page="config">
+                <span class="nav-icon">⚙️</span> Cấu hình
+            </a>
+            <a href="#" class="drawer-item" data-page="logs">
+                <span class="nav-icon">📋</span> Logs
+            </a>
+        </nav>
+        <div class="drawer-footer">
+            <div class="drawer-status">
+                <span class="status-dot unknown" id="statusDot"></span>
+                <span id="statusText">Đang kết nối...</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===== HEADER ===== -->
+    <header class="app-header">
+        <div class="header-left">
+            <button class="hamburger" id="menuToggle" title="Mở menu">☰</button>
+            <span class="header-title" id="pageTitle">📊 Tổng quan</span>
+        </div>
+        <div class="header-right">
+            <span class="clock-pill" id="clock">--:--</span>
+            <button class="header-btn" onclick="refreshCurrentPage()" title="Làm mới">↻</button>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="app-main" id="appMain">
+
+        <!-- ==================== PAGE: DASHBOARD ==================== -->
+        <section class="page active" id="page-dashboard">
+            <div class="dash-welcome">
+                <h1>🏛️ iOffice tự động hoá</h1>
+                <p>Hệ thống xử lý văn bản hành chính thông minh bằng AI Agent · Hôm nay <span id="todayDate">...</span></p>
+            </div>
+            <div class="stats-row" id="statsGrid"></div>
+            <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="card" style="margin-bottom:0;">
+                    <div class="card-header"><h3>🤖 Gemini Bridge</h3></div>
+                    <div class="card-body" id="geminiStatusCard">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom:0;">
+                    <div class="card-header"><h3>📅 Nhật ký gần đây</h3></div>
+                    <div class="card-body" id="recentJournal">
+                        <div class="empty-state">
+                            <div class="empty-icon">📝</div>
+                            <h4>Chưa có nhật ký</h4>
+                            <p>Hôm nay chưa ghi nhật ký công việc nào</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE: DOCUMENTS ==================== -->
+        <section class="page" id="page-documents">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📄 Văn bản đã xử lý</h3>
+                    <div class="search-box" style="width:220px;">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="docSearch" placeholder="Tìm văn bản..." oninput="filterDocs()">
+                    </div>
+                </div>
+                <div class="card-body" id="docList">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE: JOURNAL ==================== -->
+        <section class="page" id="page-journal">
+            <div class="journal-toolbar">
+                <div class="journal-date-nav">
+                    <button onclick="journalNav(-1)" title="Hôm trước">‹</button>
+                    <span class="j-date" id="journalDateLabel">...</span>
+                    <button onclick="journalNav(1)" title="Hôm sau">›</button>
+                    <button onclick="journalToday()" class="btn btn-xs btn-outline" style="margin-left:2px;">Hôm nay</button>
+                </div>
+                <div style="margin-left:auto;display:flex;gap:6px;">
+                    <button class="btn btn-sm btn-outline" onclick="loadJournal()">🔄</button>
+                    <button class="btn btn-sm btn-primary" onclick="saveJournal()">💾 Lưu nhật ký</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body" style="padding:0;">
+                    <textarea class="form-textarea journal-editor" id="journalEditor" placeholder="Nhập nhật ký công việc... (Markdown)"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE: TASKS ==================== -->
+        <section class="page" id="page-tasks">
+            <div class="card">
+                <div class="card-header">
+                    <h3>✅ Công việc</h3>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all" onclick="setTaskFilter('all',this)">Tất cả</button>
+                            <button class="filter-tab" data-filter="pending" onclick="setTaskFilter('pending',this)">Chưa làm</button>
+                            <button class="filter-tab" data-filter="in_progress" onclick="setTaskFilter('in_progress',this)">Đang làm</button>
+                            <button class="filter-tab" data-filter="done" onclick="setTaskFilter('done',this)">Hoàn thành</button>
+                        </div>
+                        <button class="btn btn-sm btn-primary" onclick="openTaskModal()">+ Thêm</button>
+                    </div>
+                </div>
+                <div class="card-body" id="taskList">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE: PROMPTS ==================== -->
+        <section class="page" id="page-prompts">
+            <div class="card">
+                <div class="card-header">
+                    <h3>🤖 Prompt Templates</h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-agent="all" onclick="setPromptFilter('all',this)">Tất cả</button>
+                            <button class="filter-tab" data-agent="browser" onclick="setPromptFilter('browser',this)">Browser</button>
+                            <button class="filter-tab" data-agent="document" onclick="setPromptFilter('document',this)">Document</button>
+                            <button class="filter-tab" data-agent="memory" onclick="setPromptFilter('memory',this)">Memory</button>
+                        </div>
+                        <button class="btn btn-sm btn-primary" onclick="openPromptModal()">+ Thêm</button>
+                    </div>
+                </div>
+                <div class="card-body" id="promptList">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE: KNOWLEDGE ==================== -->
+        <section class="page" id="page-knowledge">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📚 Kiến thức kỹ thuật</h3>
+                </div>
+                <div class="card-body">
+                    <div class="tab-nav" id="knowledgeTabs"></div>
+                    <div id="knowledgeContent">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE: AGENTS ==================== -->
+        <section class="page" id="page-agents">
+            <div class="card">
+                <div class="card-header">
+                    <h3>QwenPaw Agent Console</h3>
+                    <span class="badge badge-default" id="qwenpawStatusBadge">Đang kiểm tra...</span>
+                </div>
+                <div class="card-body">
+                    <div class="agent-command-grid">
+                        <div class="form-group">
+                            <label class="form-label">Agent</label>
+                            <select class="form-select" id="agentCommandAgent">
+                                <option value="ioffice-orchestrator">Điều phối</option>
+                                <option value="ioffice-browser">Trình duyệt/iOffice</option>
+                                <option value="ioffice-document">Văn bản</option>
+                                <option value="ioffice-memory-task">Bộ nhớ/Công việc</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Session</label>
+                            <input class="form-input" id="agentCommandSession" value="ioffice-dashboard" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Lệnh tiếng Việt</label>
+                        <textarea class="form-textarea" id="agentCommandInput" rows="5" placeholder="VD: Đọc văn bản đến mới nhất, tóm tắt nội dung, tạo đề xuất xử lý và không submit khi chưa được duyệt."></textarea>
+                    </div>
+                    <div class="agent-command-actions">
+                        <button class="btn btn-primary" onclick="sendAgentCommand()">Gửi lệnh</button>
+                        <button class="btn btn-outline" onclick="fillSafeDraftCommand()">Mẫu soạn thảo an toàn</button>
+                    </div>
+                    <pre class="agent-output" id="agentCommandOutput">Chưa có kết quả.</pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>👤 Trạng thái Agent</h3>
+                    <button class="btn btn-sm btn-outline" onclick="refreshAgents()">🔄 Làm mới</button>
+                </div>
+                <div class="card-body">
+                    <div class="agent-grid" id="agentGrid">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>🧠 Model Gemini có sẵn</h3></div>
+                <div class="card-body" id="geminiModels">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE: CONFIG ==================== -->
+        <section class="page" id="page-config">
+            <div class="card">
+                <div class="card-header">
+                    <h3>⚙️ Cấu hình iOffice</h3>
+                    <button class="btn btn-sm btn-primary" onclick="saveConfig()">💾 Lưu</button>
+                </div>
+                <div class="card-body">
+                    <div class="config-grid" id="configForm"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE: LOGS ==================== -->
+        <section class="page" id="page-logs">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📋 System Logs</h3>
+                    <button class="btn btn-sm btn-outline" onclick="refreshLogs()">🔄 Làm mới</button>
+                </div>
+                <div class="card-body" id="logContent">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay hidden" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal</h3>
+                <button class="modal-close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

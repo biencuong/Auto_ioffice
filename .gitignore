@@ -1,0 +1,58 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.cache/
+__pycache__/
+*.py[cod]
+
+# Runtime logs and generated data
+logs/
+*.log
+artifacts/
+memory/
+ioffice-dashboard/dashboard.log
+
+# One-off local probes that may contain sessions, cookies, or local paths
+/*.py
+scripts/download_ioffice.py
+scripts/extract_pdf_text.py
+
+# Local or private QwenPaw/runtime configuration
+agent.json
+PROFILE.md
+MEMORY.md
+SOUL.md
+.trae/
+
+# Packaged/exported copies and duplicated extracted bundles
+bundle/
+Auto_ioffice_bundle.zip
+skills/ioffice-agent/ioffice-agent/
+ioffice-dashboard/public/public/
+
+# Local documents and captured iOffice assets
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.bmp
+*.tif
+*.tiff
+
+# Environment files and secrets
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+cookies/
+storage-state*.json

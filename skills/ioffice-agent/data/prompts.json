@@ -1,0 +1,67 @@
+{
+  "prompts": [
+    {
+      "id": "prompt-1715412345000",
+      "name": "doc-extract",
+      "agent": "document",
+      "description": "Trích xuất thông tin từ file DOCX văn bản hành chính",
+      "content": "Đọc file DOCX sau và trích xuất thông tin thành JSON.\nFile: {file_path}\n\nYêu cầu trích xuất:\n- so_hieu: Số hiệu văn bản (VD: 123/QĐ-SGDĐT)\n- ngay_thang: Ngày ban hành (DD/MM/YYYY)\n- trich_yeu: Trích yếu nội dung\n- nguoi_ky: Người ký văn bản\n- loai_van_ban: Loại văn bản (Quyết định, Chỉ thị, Công văn,...)\n- co_quan_ban_hanh: Cơ quan ban hành\n\nTrả về JSON hợp lệ, không kèm giải thích.",
+      "created_at": "2026-05-11T12:00:00.000Z",
+      "updated_at": "2026-05-13T00:00:00.000Z"
+    },
+    {
+      "id": "prompt-1715412350000",
+      "name": "form-analyze",
+      "agent": "browser",
+      "description": "Phân tích form iOffice từ screenshot",
+      "content": "Phân tích screenshot của form VNPT iOffice.\n\nCho biết:\n1. Các form field có trên trang (input, select, textarea, button)\n2. CSS selector hoặc mô tả để tìm từng field\n3. Trình tự thao tác (field nào trước, field nào sau)\n4. Có WYSIWYG editor không? Nếu có, mô tả cấu trúc\n5. Nút submit/action ở đâu?\n\nTrả về dạng JSON:\n{fields: [{name, selector, type, required}], steps: [...], wysiwyg: bool, submit: selector}",
+      "created_at": "2026-05-11T12:00:00.000Z",
+      "updated_at": "2026-05-13T00:00:00.000Z"
+    },
+    {
+      "id": "prompt-1715412360000",
+      "name": "journal-daily",
+      "agent": "memory",
+      "description": "Tạo nhật ký công việc cuối ngày",
+      "content": "Tạo nhật ký công việc cho ngày {date}.\n\nThông tin cần ghi:\n- Tổng số file đã xử lý\n- Số file thành công\n- Số file lỗi\n- Model đã sử dụng\n- Các lỗi mới gặp (nếu có)\n- Các technical note cần lưu ý\n- Task cho ngày mai\n\nFormat: Markdown, có bảng thống kê.",
+      "created_at": "2026-05-11T12:00:00.000Z",
+      "updated_at": "2026-05-13T00:00:00.000Z"
+    },
+    {
+      "id": "prompt-1715412370000",
+      "name": "error-diagnose",
+      "agent": "browser",
+      "description": "Chẩn đoán lỗi khi upload thất bại",
+      "content": "Phân tích lỗi khi upload văn bản lên iOffice.\n\nScreenshot: {screenshot}\nMô tả lỗi: {error_description}\n\nCho biết:\n1. Nguyên nhân có thể (thiếu field, sai format, timeout, network)\n2. Cách xử lý đề nghị\n3. Có cần retry không?\n4. Cần lưu ý gì cho lần sau?\n\nTrả về JSON: {cause, solution, should_retry, notes}",
+      "created_at": "2026-05-11T12:00:00.000Z",
+      "updated_at": "2026-05-13T00:00:00.000Z"
+    },
+    {
+      "id": "prompt-1715412380000",
+      "name": "orchestrate-batch",
+      "agent": "browser",
+      "description": "Điều phối xử lý batch nhiều file",
+      "content": "Bắt đầu xử lý batch văn bản.\n\nSố lượng file: {file_count}\nDanh sách: {file_list}\n\nKế hoạch:\n1. Đọc knowledge base để lấy form mapping\n2. Login iOffice một lần\n3. Với mỗi file:\n   a. Gọi Document Agent đọc file -> lấy JSON\n   b. Upload file + điền form\n   c. Kiểm tra kết quả\n   d. Nếu lỗi -> retry tối đa 3 lần\n4. Sau khi xong -> gọi Memory Agent ghi nhật ký\n5. Báo cáo cho user\n\nLuôn kiểm tra file đã xử lý trước khi bắt đầu.",
+      "created_at": "2026-05-11T12:00:00.000Z",
+      "updated_at": "2026-05-13T00:00:00.000Z"
+    },
+    {
+      "id": "prompt-20260513-orchestrator-safe",
+      "name": "orchestrator-safe-intake",
+      "agent": "orchestrator",
+      "description": "Nhận lệnh tự nhiên và chia việc theo chế độ duyệt trước",
+      "content": "Nhận yêu cầu: {user_request}\n\nHãy lập kế hoạch thực hiện cho Auto_iOffice theo 4 agent: orchestrator, browser, document, memory-task.\n\nQuy tắc:\n- Được phép đọc và phân tích dữ liệu.\n- Được phép soạn thảo và đề xuất hành động.\n- Không gửi, submit, phát hành, xóa, chuyển xử lý hoặc thay đổi trạng thái trên iOffice khi chưa có approval.\n- Nếu cần hành động rủi ro, trả về action proposal JSON với title, action_type, target, content, risk, source_agent.\n\nTrả về tiếng Việt có dấu, gồm: mục tiêu, phân công agent, kết quả mong đợi, nội dung cần duyệt.",
+      "created_at": "2026-05-13T00:00:00.000Z",
+      "updated_at": "2026-05-13T00:00:00.000Z"
+    },
+    {
+      "id": "prompt-20260513-draft-review",
+      "name": "document-draft-review",
+      "agent": "document",
+      "description": "Soạn dự thảo và kiểm tra thể thức trước khi trình duyệt",
+      "content": "Từ nội dung văn bản đến và chỉ đạo sau, hãy soạn dự thảo văn bản hành chính.\n\nNội dung nguồn: {source_content}\nChỉ đạo: {instruction}\nLoại văn bản: {document_type}\n\nCần trả về:\n1. Tóm tắt căn cứ và mục đích.\n2. Dự thảo nội dung văn bản.\n3. Checklist thể thức: quốc hiệu/tiêu ngữ, số ký hiệu, địa danh ngày tháng, trích yếu, nơi nhận, người ký, đính kèm.\n4. Những điểm cần người dùng duyệt hoặc bổ sung.\n\nKhông tự ý khẳng định căn cứ pháp lý nếu nguồn không có.",
+      "created_at": "2026-05-13T00:00:00.000Z",
+      "updated_at": "2026-05-13T00:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "ioffice-agent",
+  "description": "Hệ thống AI Agent tự động xử lý văn bản đi trên VNPT iOffice. Tích hợp hội đồng đa agent, bộ nhớ ngắn/dài hạn, nhật ký công việc, nhắc việc ngữ nghĩa.",
+  "version": "1.0.0",
+  "author": "default agent",
+  "emoji": "🏛️",
+  "requires": {
+    "skills": ["multi_agent_collaboration", "cron", "browser_visible", "pdf", "docx"],
+    "tools": ["browser_use", "query", "chat_with_agent", "memory_search"]
+  },
+  "memory": {
+    "paths": [
+      "memory/ioffice/technical/",
+      "memory/ioffice/journal/",
+      "memory/ioffice/processed/",
+      "memory/ioffice/sessions/"
+    ]
+  },
+  "agents": {
+    "ioffice-orchestrator": {
+      "config": "agents/orchestrator-agent.yaml",
+      "auto_start": false
+    },
+    "ioffice-browser": {
+      "config": "agents/browser-agent.yaml",
+      "auto_start": false
+    },
+    "ioffice-document": {
+      "config": "agents/doc-agent.yaml",
+      "auto_start": false
+    },
+    "ioffice-memory-task": {
+      "config": "agents/memory-agent.yaml",
+      "auto_start": false
+    }
+  }
+}
